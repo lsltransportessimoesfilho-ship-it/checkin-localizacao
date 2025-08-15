@@ -23,14 +23,14 @@
       box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
     }
     img.logo {
-  display: block;
-  max-width: 150px;   /* largura máxima */
-  height: auto;       /* altura proporcional */
-  margin: 0 auto 20px; /* centraliza e dá espaço abaixo */
-  object-fit: contain; /* evita distorção */
-}
-
-
+      display: block;
+      max-width: 80px;   
+      max-height: 40px;   
+      width: auto;
+      height: auto;
+      margin: 0 auto 12px;
+      object-fit: contain;
+    }
     h2 {
       color: #003366;
     }
@@ -52,12 +52,19 @@
     button:hover {
       background-color: #0044aa;
     }
+    #formulario {
+      display: none;
+      width: 100%;
+      height: 600px;
+      margin-top: 20px;
+      border: none;
+    }
   </style>
 </head>
 <body>
 
-<div class="card">
-  <img src="lsl.png">
+<div class="card" id="container">
+  <img src="lsl.png" class="logo">
   <h2>Registro de Chegada</h2>
   <p>LSL Transportes da Amazônia – PAD Simões Filho</p>
   <p id="status">Clique no botão abaixo para iniciar o registro.</p>
@@ -65,11 +72,12 @@
   <p class="msg">Este registro só é permitido dentro do perímetro autorizado da empresa.</p>
 </div>
 
+<iframe id="formulario" src=""></iframe>
+
 <script>
-  // Coordenadas do local permitido
   const LATITUDE_ALVO = -12.6316685;  
   const LONGITUDE_ALVO = -38.265392; 
-  const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSc9tq-rajX4bXekfQcl8p01VraF5lRMPg0uJAnVBIx_KTzW5w/viewform?usp=header";
+  const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSc9tq-rajX4bXekfQcl8p01VraF5lRMPg0uJAnVBIx_KTzW5w/viewform?embedded=true";
   const RAIO_MAX_METROS = 800;
 
   function iniciarRegistro() {
@@ -87,8 +95,10 @@
         const distancia = calcularDistancia(lat, lon, LATITUDE_ALVO, LONGITUDE_ALVO);
         
         if (distancia <= RAIO_MAX_METROS) {
-          document.getElementById('status').innerText = "Dentro do perímetro. Redirecionando...";
-          setTimeout(() => window.location.href = FORM_URL, 1500);
+          document.getElementById('status').innerText = "Dentro do perímetro. Formulário liberado!";
+          document.getElementById('formulario').src = FORM_URL;
+          document.getElementById('formulario').style.display = "block";
+          document.getElementById('container').style.display = "none";
         } else {
           document.getElementById('status').innerText = `Você está fora do perímetro (${distancia.toFixed(1)}m).`;
         }
@@ -102,20 +112,3 @@
       }
     );
   }
-
-  function calcularDistancia(lat1, lon1, lat2, lon2) {
-    const R = 6371000; // metros
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * Math.PI / 180) *
-      Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  }
-</script>
-
-</body>
-</html>
