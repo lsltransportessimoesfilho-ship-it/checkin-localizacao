@@ -24,10 +24,9 @@
     }
     img.logo {
       display: block;
-      max-width: 120px;
+      max-width: 100px;
       height: auto;
       margin: 0 auto 12px;
-      object-fit: contain;
     }
     h2 {
       color: #003366;
@@ -50,17 +49,80 @@
     button:hover {
       background-color: #0044aa;
     }
-    iframe {
+    #formulario {
+      display: none;
       width: 100%;
-      height: 500px;
-      border: none;
+      height: 600px;
       margin-top: 20px;
-      display: none; /* Começa escondido */
+      border: none;
     }
   </style>
 </head>
 <body>
 
-<div class="card">
+<div class="card" id="container">
   <img src="lsl.png" class="logo">
-  <h2>Registro de Ch
+  <h2>Registro de Chegada</h2>
+  <p>LSL Transportes da Amazônia – PAD Simões Filho</p>
+  <p id="status">Clique no botão abaixo para iniciar o registro.</p>
+  <button onclick="iniciarRegistro()">Iniciar Registro</button>
+  <p class="msg">Este registro só é permitido dentro do perímetro autorizado da empresa.</p>
+</div>
+
+<iframe id="formulario" src=""></iframe>
+
+<script>
+  const LATITUDE_ALVO = -12.6316685;  
+  const LONGITUDE_ALVO = -38.265392; 
+  const RAIO_MAX_METROS = 150;
+  const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSc9tq-rajX4bXekfQcl8p01VraF5lRMPg0uJAnVBIx_KTzW5w/viewform?embedded=true";
+
+  function iniciarRegistro() {
+    document.getElementById('status').innerText = "Solicitando permissão de localização...";
+    
+    if (!navigator.geolocation) {
+      document.getElementById('status').innerText = "Geolocalização não é suportada neste navegador.";
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        const distancia = calcularDistancia(lat, lon, LATITUDE_ALVO, LONGITUDE_ALVO);
+        
+        if (distancia <= RAIO_MAX_METROS) {
+          document.getElementById('status').innerText = "Dentro do perímetro. Formulário liberado!";
+          document.getElementById('formulario').src = FORM_URL;
+          document.getElementById('formulario').style.display = "block";
+          document.getElementById('container').style.display = "none";
+        } else {
+          document.getElementById('status').innerText = `Você está fora do perímetro (${distancia.toFixed(1)}m).`;
+        }
+      },
+      (err) => {
+        if (err.code === 1) {
+          document.getElementById('status').innerText = "Permissão negada. Clique no botão para tentar novamente.";
+        } else {
+          document.getElementById('status').innerText = "Erro ao obter localização.";
+        }
+      }
+    );
+  }
+
+  function calcularDistancia(lat1, lon1, lat2, lon2) {
+    const R = 6371000; // metros
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) *
+      Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+</script>
+
+</body>
+</html>
