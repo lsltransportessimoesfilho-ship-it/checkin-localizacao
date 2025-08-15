@@ -1,179 +1,101 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Registro de Chegada • LSL Transportes</title>
-  <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro de Chegada - LSL Transportes</title>
+<style>
     body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(135deg, #004aad, #0077ff);
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+        font-family: Arial, sans-serif;
+        background-color: #f4f6f8;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        color: #002b64;
     }
-    .card {
-      background: #ffffff;
-      color: #111827;
-      max-width: 400px;
-      width: 100%;
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 6px 20px rgba(0,0,0,.15);
-      text-align: center;
+    .container {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        max-width: 400px;
+        text-align: center;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    img.logo {
+        max-width: 200px;
+        margin-bottom: 15px;
     }
     h1 {
-      font-size: 1.5rem;
-      margin-bottom: 4px;
+        font-size: 1.5em;
+        margin-bottom: 10px;
     }
-    h2 {
-      font-size: 1rem;
-      color: #555;
-      margin-top: 0;
-    }
-    .icon {
-      font-size: 48px;
-      margin-bottom: 8px;
+    p {
+        font-size: 1em;
+        margin-bottom: 20px;
     }
     .status {
-      margin-top: 16px;
-      padding: 12px 14px;
-      border-radius: 12px;
-      background: #f3f4f6;
-      color: #111;
-      font-size: 0.9rem;
-      text-align: left;
+        font-weight: bold;
+        margin-top: 15px;
     }
-    .ok { background: #ecfdf5; color: #065f46; }
-    .err { background: #fef2f2; color: #991b1b; }
-    .spinner {
-      width: 20px; height: 20px;
-      border: 3px solid #e5e7eb;
-      border-top-color: #111827;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      display: inline-block;
-      vertical-align: middle;
-      margin-right: 8px;
+    button {
+        background-color: #002b64;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 1em;
+        cursor: pointer;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .hint {
-      margin-top: 12px;
-      font-size: .85rem;
-      color: #6b7280;
+    button:hover {
+        background-color: #004080;
     }
-    .btn {
-      display: inline-block;
-      background: #004aad;
-      color: #fff;
-      padding: 12px 20px;
-      margin-top: 20px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    .btn:hover {
-      background: #003a87;
-    }
-    .mono {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 0.8rem;
-      margin-top: 10px;
-      color: #555;
-    }
-  </style>
+</style>
 </head>
 <body>
-  <div class="card">
-    <div class="icon">🚚</div>
+
+<div class="container">
+    <img src="lsl.png" alt="Logo LSL" class="logo">
     <h1>Registro de Chegada</h1>
-    <h2>LSL Transportes – PAD Simões Filho</h2>
-    <p>Para registrar sua chegada, permita o acesso à localização e esteja no perímetro da empresa.</p>
-    <button class="btn" onclick="init()">Iniciar Registro</button>
-    <div id="status" class="status" style="display:none;"></div>
-    <div id="debug" class="mono"></div>
-  </div>
+    <p>LSL Transportes da Amazônia - PAD Simões Filho</p>
+    <p id="mensagem">Validando sua localização...</p>
+    <div id="status" class="status"></div>
+    <button id="tentarNovamente" style="display:none;" onclick="obterLocalizacao()">Tentar novamente</button>
+</div>
 
 <script>
-  // CONFIGURAÇÕES
-  const LAT_EMPRESA = -12.808930812471532;
-  const LNG_EMPRESA = -38.42873008974748;
-  const RAIO_METROS = 150;
-  const LINK_FORM = "https://docs.google.com/forms/d/1HdaFhx9qkbRRAote0J4oY5-pHBOlYdxN_XniWPBzNn4/viewform";
+function obterLocalizacao() {
+    document.getElementById('mensagem').innerText = "Validando sua localização...";
+    document.getElementById('status').innerText = "";
+    document.getElementById('tentarNovamente').style.display = "none";
 
-  function distanciaEmMetros(lat1, lon1, lat2, lon2) {
-    const R = 6371e3;
-    const toRad = deg => deg * Math.PI / 180;
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-    const a = Math.sin(dLat/2) ** 2 +
-              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-              Math.sin(dLon/2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  }
-
-  function setStatus(html, cls="") {
-    const box = document.getElementById("status");
-    box.className = "status " + cls;
-    box.style.display = "block";
-    box.innerHTML = html;
-  }
-
-  function debug(msg) {
-    const el = document.getElementById("debug");
-    el.textContent = (el.textContent ? el.textContent + "\n" : "") + msg;
-  }
-
-  function handlePosition(pos) {
-    const { latitude, longitude, accuracy } = pos.coords;
-    const dist = Math.round(distanciaEmMetros(latitude, longitude, LAT_EMPRESA, LNG_EMPRESA));
-    debug(`lat: ${latitude.toFixed(6)}, lng: ${longitude.toFixed(6)}, precisão: ${Math.round(accuracy)}m, dist: ${dist}m`);
-
-    if (accuracy > 150) {
-      setStatus(`<strong>Precisão fraca (${Math.round(accuracy)}m).</strong> Ative o GPS em alta precisão e tente novamente.`, "err");
-      return;
-    }
-
-    if (dist <= RAIO_METROS) {
-      setStatus(`<strong>Local verificado!</strong> Redirecionando para o formulário…`, "ok");
-      const url = new URL(LINK_FORM);
-      url.searchParams.set("utm_lat", latitude.toFixed(6));
-      url.searchParams.set("utm_lng", longitude.toFixed(6));
-      url.searchParams.set("utm_acc", Math.round(accuracy));
-      setTimeout(() => window.location.replace(url.toString()), 1200);
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                document.getElementById('mensagem').innerText = "Localização obtida com sucesso!";
+                document.getElementById('status').innerText = "Latitude: " + position.coords.latitude.toFixed(6) +
+                    ", Longitude: " + position.coords.longitude.toFixed(6);
+            },
+            function(error) {
+                if (error.code === error.PERMISSION_DENIED) {
+                    document.getElementById('mensagem').innerText = "Permissão negada para acessar localização.";
+                    document.getElementById('tentarNovamente').style.display = "inline-block";
+                } else {
+                    document.getElementById('mensagem').innerText = "Erro ao obter localização.";
+                }
+            }
+        );
     } else {
-      setStatus(`<strong>Fora do perímetro.</strong> Você está a ${dist}m do ponto autorizado.`, "err");
+        document.getElementById('mensagem').innerText = "Geolocalização não é suportada neste dispositivo.";
     }
-  }
+}
 
-  function handleError(err) {
-    let msg = "Não foi possível obter sua localização.";
-    if (err.code === 1) msg = "Permissão negada. Toque em 'Iniciar Registro' e permita o acesso.";
-    if (err.code === 2) msg = "Posição indisponível. Verifique se o GPS está ligado.";
-    if (err.code === 3) msg = "Tempo esgotado tentando obter a posição.";
-    setStatus("<strong>" + msg + "</strong>", "err");
-    debug("Erro (" + err.code + "): " + err.message);
-  }
-
-  function init() {
-    if (!("geolocation" in navigator)) {
-      setStatus("<strong>Seu dispositivo não suporta geolocalização.</strong>", "err");
-      return;
-    }
-    setStatus("<span class='spinner'></span><strong>Buscando sua posição...</strong>");
-    navigator.geolocation.getCurrentPosition(handlePosition, handleError, {
-      enableHighAccuracy: true,
-      timeout: 15000,
-      maximumAge: 0
-    });
-  }
+window.onload = obterLocalizacao;
 </script>
+
 </body>
 </html>
