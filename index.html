@@ -34,18 +34,14 @@
     </div>
   </div>
 
-  <!-- Contêiner em tela cheia para o formulário -->
   <div id="formulario">
     <iframe id="iframeForm" src="" title="Formulário de Check-in"></iframe>
   </div>
 
   <script>
-    // Coordenadas de destino e raio permitido
     const LATITUDE_ALVO  = -12.6316685;
     const LONGITUDE_ALVO = -38.265392;
     const RAIO_MAX_METROS = 150;
-
-    // Link EMBED correto do Google Forms (não abre nova aba)
     const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSc9tq-rajX4bXekfQcl8p01VraF5lRMPg0uJAnVBIx_KTzW5w/viewform?embedded=true";
 
     const statusEl   = document.getElementById('status');
@@ -68,7 +64,6 @@
         return;
       }
 
-      // Solicita posição (precisão padrão é suficiente aqui)
       navigator.geolocation.getCurrentPosition(onPosOk, onPosErro, {
         enableHighAccuracy: false,
         timeout: 15000,
@@ -89,11 +84,9 @@ Distância até o ponto-alvo: ${distancia.toFixed(1)} m`;
 
       if (distancia <= RAIO_MAX_METROS) {
         statusEl.textContent = "Dentro do perímetro. Abrindo formulário…";
-        // Mostra iframe em tela cheia e carrega o formulário
         setTimeout(() => {
           iframeForm.src = FORM_URL;
           formWrap.style.display = "block";
-          // Opcional: esconder a tela inicial por completo
           document.getElementById('telaInicial').style.display = "none";
         }, 800);
       } else {
@@ -114,5 +107,21 @@ Distância até o ponto-alvo: ${distancia.toFixed(1)} m`;
       btnIniciar.disabled = false;
     }
 
-    // Haversine em metros
-    function calcularDistancia(lat1, lo
+    function calcularDistancia(lat1, lon1, lat2, lon2) {
+      const R = 6371000;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1 * Math.PI / 180) *
+        Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) ** 2;
+      return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    if (new URLSearchParams(location.search).get('auto') === '1') {
+      iniciarRegistro();
+    }
+  </script>
+</body>
+</html>
