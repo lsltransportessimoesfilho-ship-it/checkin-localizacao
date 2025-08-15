@@ -1,7 +1,16 @@
+<div id="status"></div>
+<div id="formulario" style="display:none; height: 90vh;">
+  <iframe 
+    src="" 
+    id="iframeForm" 
+    style="width: 100%; height: 100%; border: none;">
+  </iframe>
+</div>
+
 <script>
   const LATITUDE_ALVO = -12.6316685;  
   const LONGITUDE_ALVO = -38.265392; 
-  const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSc9tq-rajX4bXekfQcl8p01VraF5lRMPg0uJAnVBIx_KTzW5w/viewform?usp=header";
+  const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSc9tq-rajX4bXekfQcl8p01VraF5lRMPg0uJAnVBIx_KTzW5w/viewform?embedded=true";
   const RAIO_MAX_METROS = 150;
 
   function iniciarRegistro() {
@@ -19,7 +28,6 @@
 
         const distancia = calcularDistancia(lat, lon, LATITUDE_ALVO, LONGITUDE_ALVO);
 
-        // Mostra coordenadas atuais para você confirmar
         document.getElementById('status').innerHTML = `
           Sua localização atual:<br>
           Latitude: ${lat.toFixed(6)}<br>
@@ -29,8 +37,9 @@
 
         if (distancia <= RAIO_MAX_METROS) {
           setTimeout(() => {
-            document.getElementById('status').innerText = "Dentro do perímetro. Redirecionando...";
-            window.location.href = FORM_URL;
+            document.getElementById('status').innerText = "Dentro do perímetro. Carregando formulário...";
+            document.getElementById('iframeForm').src = FORM_URL;
+            document.getElementById('formulario').style.display = "block";
           }, 1500);
         }
       },
@@ -49,10 +58,10 @@
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.sin(dLat / 2) ** 2 +
       Math.cos(lat1 * Math.PI / 180) *
       Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      Math.sin(dLon / 2) ** 2;
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
