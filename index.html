@@ -1,81 +1,8 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registro de Chegada</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #cfe4ff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .card {
-      background-color: white;
-      border-radius: 12px;
-      padding: 30px;
-      max-width: 400px;
-      text-align: center;
-      box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
-    }
-    img.logo {
-      display: block;
-      max-width: 100px;
-      height: auto;
-      margin: 0 auto 12px;
-    }
-    h2 {
-      color: #003366;
-    }
-    .msg {
-      margin-top: 15px;
-      font-size: 14px;
-      color: #333;
-    }
-    button {
-      background-color: #0055cc;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      margin-top: 15px;
-    }
-    button:hover {
-      background-color: #0044aa;
-    }
-    #formulario {
-      display: none;
-      width: 100%;
-      height: 600px;
-      margin-top: 20px;
-      border: none;
-    }
-  </style>
-</head>
-<body>
-
-<div class="card" id="container">
-  <img src="lsl.png" class="logo">
-  <h2>Registro de Chegada</h2>
-  <p>LSL Transportes da Amazônia – PAD Simões Filho</p>
-  <p id="status">Clique no botão abaixo para iniciar o registro.</p>
-  <button onclick="iniciarRegistro()">Iniciar Registro</button>
-  <p class="msg">Este registro só é permitido dentro do perímetro autorizado da empresa.</p>
-</div>
-
-<iframe id="formulario" src=""></iframe>
-
 <script>
   const LATITUDE_ALVO = -12.6316685;  
   const LONGITUDE_ALVO = -38.265392; 
+  const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSc9tq-rajX4bXekfQcl8p01VraF5lRMPg0uJAnVBIx_KTzW5w/viewform?usp=header";
   const RAIO_MAX_METROS = 150;
-  const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSc9tq-rajX4bXekfQcl8p01VraF5lRMPg0uJAnVBIx_KTzW5w/viewform?embedded=true";
 
   function iniciarRegistro() {
     document.getElementById('status').innerText = "Solicitando permissão de localização...";
@@ -89,15 +16,22 @@
       (pos) => {
         const lat = pos.coords.latitude;
         const lon = pos.coords.longitude;
+
         const distancia = calcularDistancia(lat, lon, LATITUDE_ALVO, LONGITUDE_ALVO);
-        
+
+        // Mostra coordenadas atuais para você confirmar
+        document.getElementById('status').innerHTML = `
+          Sua localização atual:<br>
+          Latitude: ${lat.toFixed(6)}<br>
+          Longitude: ${lon.toFixed(6)}<br>
+          Distância até o ponto-alvo: ${distancia.toFixed(1)}m
+        `;
+
         if (distancia <= RAIO_MAX_METROS) {
-          document.getElementById('status').innerText = "Dentro do perímetro. Formulário liberado!";
-          document.getElementById('formulario').src = FORM_URL;
-          document.getElementById('formulario').style.display = "block";
-          document.getElementById('container').style.display = "none";
-        } else {
-          document.getElementById('status').innerText = `Você está fora do perímetro (${distancia.toFixed(1)}m).`;
+          setTimeout(() => {
+            document.getElementById('status').innerText = "Dentro do perímetro. Redirecionando...";
+            window.location.href = FORM_URL;
+          }, 1500);
         }
       },
       (err) => {
@@ -123,6 +57,3 @@
     return R * c;
   }
 </script>
-
-</body>
-</html>
