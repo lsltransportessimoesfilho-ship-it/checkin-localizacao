@@ -23,9 +23,15 @@
       box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
     }
     img.logo {
-      max-width: 100px;
-      margin-bottom: 10px;
-    }
+  display: block;
+  max-width: 120px;   /* largura máxima */
+  max-height: 80px;   /* altura máxima */
+  width: auto;
+  height: auto;
+  margin: 0 auto 12px;
+  object-fit: contain; /* garante que não distorce */
+}
+
     h2 {
       color: #003366;
     }
