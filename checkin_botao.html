@@ -1,0 +1,116 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Check-in Motorista • Validação de Localização</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; padding: 24px; }
+    .card { max-width: 720px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; box-shadow: 0 6px 16px rgba(0,0,0,.06); }
+    h1 { font-size: 1.25rem; margin: 0 0 12px 0; }
+    .muted { color: #6b7280; }
+    .status { margin-top: 16px; padding: 12px 14px; border-radius: 12px; background: #f3f4f6; }
+    .ok { background: #ecfdf5; }
+    .err { background: #fef2f2; }
+    .spinner { width: 20px; height: 20px; border: 3px solid #e5e7eb; border-top-color: #111827; border-radius: 50%; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 8px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .small { font-size: .875rem; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    .hint { margin-top: 12px; color: #6b7280; }
+    .cta { margin-top: 16px; display: inline-block; padding: 10px 14px; border-radius: 10px; border: 1px solid #111827; text-decoration: none; color: #111827; cursor: pointer; background: white; }
+    .cta:hover { background: #f9fafb; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Check-in Motorista</h1>
+    <p class="muted">Clique no botão abaixo para iniciar a validação de localização.</p>
+    <button id="startBtn" class="cta">Iniciar Check-in</button>
+    <div id="status" class="status" style="display:none;"></div>
+    <p class="hint small">Se for solicitado, toque em <strong>Permitir</strong> para compartilhar sua localização.</p>
+    <div id="debug" class="hint small mono"></div>
+  </div>
+
+<script>
+  // CONFIGURAÇÕES
+  const LAT_EMPRESA = -12.808930812471532;
+  const LNG_EMPRESA = -38.42873008974748;
+  const RAIO_METROS = 150;
+  const LINK_FORM = "https://docs.google.com/forms/d/1HdaFhx9qkbRRAote0J4oY5-pHBOlYdxN_XniWPBzNn4/viewform";
+
+  function distanciaEmMetros(lat1, lon1, lat2, lon2) {
+    const R = 6371e3;
+    const toRad = deg => deg * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+
+  function setStatus(html, cls="") {
+    const box = document.getElementById("status");
+    box.style.display = "block";
+    box.className = "status " + cls;
+    box.innerHTML = html;
+  }
+
+  function debug(msg) {
+    const el = document.getElementById("debug");
+    el.textContent = (el.textContent ? el.textContent + "\n" : "") + msg;
+  }
+
+  function handlePosition(pos) {
+    const { latitude, longitude, accuracy } = pos.coords;
+    const dist = Math.round(distanciaEmMetros(latitude, longitude, LAT_EMPRESA, LNG_EMPRESA));
+    debug(`lat: ${latitude.toFixed(6)}, lng: ${longitude.toFixed(6)}, precisão: ${Math.round(accuracy)}m, dist: ${dist}m`);
+
+    if (accuracy > 150) {
+      setStatus(
+        `<strong>Precisão fraca (${Math.round(accuracy)}m).</strong> Ative GPS/Alta precisão e tente novamente.`,
+        "err"
+      );
+      return;
+    }
+
+    if (dist <= RAIO_METROS) {
+      setStatus(`<strong>Local verificado!</strong> Redirecionando…`, "ok");
+      const url = new URL(LINK_FORM);
+      url.searchParams.set("utm_lat", latitude.toFixed(6));
+      url.searchParams.set("utm_lng", longitude.toFixed(6));
+      url.searchParams.set("utm_acc", Math.round(accuracy));
+      window.location.replace(url.toString());
+    } else {
+      setStatus(`<strong>Fora do perímetro.</strong> Está a ${dist}m do ponto autorizado.`, "err");
+    }
+  }
+
+  function handleError(err) {
+    let msg = "Não foi possível obter sua localização.";
+    if (err.code === 1) msg = "Permissão negada. Toque em permitir para continuar.";
+    if (err.code === 2) msg = "Posição indisponível. Verifique se o GPS está ligado.";
+    if (err.code === 3) msg = "Tempo esgotado tentando obter a posição.";
+    setStatus("<strong>" + msg + "</strong>", "err");
+    debug("Erro (" + err.code + "): " + err.message);
+  }
+
+  function init() {
+    if (!("geolocation" in navigator)) {
+      setStatus("<strong>Seu dispositivo não suporta geolocalização.</strong>", "err");
+      return;
+    }
+    setStatus("<span class='spinner'></span><strong>Validando localização…</strong>");
+    navigator.geolocation.getCurrentPosition(handlePosition, handleError, {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0
+    });
+  }
+
+  document.getElementById("startBtn").addEventListener("click", init);
+</script>
+</body>
+</html>
