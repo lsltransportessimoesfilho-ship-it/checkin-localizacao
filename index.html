@@ -50,68 +50,17 @@
     button:hover {
       background-color: #0044aa;
     }
+    iframe {
+      width: 100%;
+      height: 500px;
+      border: none;
+      margin-top: 20px;
+      display: none; /* Começa escondido */
+    }
   </style>
 </head>
 <body>
 
 <div class="card">
   <img src="lsl.png" class="logo">
-  <h2>Registro de Chegada</h2>
-  <p>LSL Transportes da Amazônia – PAD Simões Filho</p>
-  <p id="status">Clique no botão abaixo para iniciar o registro.</p>
-  <button onclick="solicitarLocalizacao()">Iniciar Registro</button>
-  <p class="msg">Este registro só é permitido dentro do perímetro autorizado da empresa.</p>
-</div>
-
-<script>
-  const LATITUDE_ALVO = -12.6316685;  
-  const LONGITUDE_ALVO = -38.265392; 
-  const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSc9tq-rajX4bXekfQcl8p01VraF5lRMPg0uJAnVBIx_KTzW5w/viewform?usp=header";
-  const RAIO_MAX_METROS = 800;
-
-  function solicitarLocalizacao() {
-    // Reseta o texto sempre que clicar no botão
-    document.getElementById('status').innerText = "Solicitando permissão de localização...";
-
-    // Força o navegador a tentar obter localização toda vez
-    navigator.geolocation.getCurrentPosition(
-      verificarPosicao,
-      tratarErro,
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
-  }
-
-  function verificarPosicao(pos) {
-    const lat = pos.coords.latitude;
-    const lon = pos.coords.longitude;
-    const distancia = calcularDistancia(lat, lon, LATITUDE_ALVO, LONGITUDE_ALVO);
-    
-    if (distancia <= RAIO_MAX_METROS) {
-      document.getElementById('status').innerText = "Dentro do perímetro. Redirecionando...";
-      setTimeout(() => window.location.href = FORM_URL, 1500);
-    } else {
-      document.getElementById('status').innerText = `Você está fora do perímetro (${distancia.toFixed(1)}m). Clique no botão para tentar novamente.`;
-    }
-  }
-
-  function tratarErro(err) {
-    if (err.code === 1) {
-      document.getElementById('status').innerText = "Permissão negada. Clique no botão para tentar novamente.";
-    } else if (err.code === 2) {
-      document.getElementById('status').innerText = "Localização indisponível. Verifique seu GPS.";
-    } else if (err.code === 3) {
-      document.getElementById('status').innerText = "Tempo de solicitação esgotado. Clique no botão para tentar novamente.";
-    } else {
-      document.getElementById('status').innerText = "Erro ao obter localização. Tente novamente.";
-    }
-  }
-
-  function calcularDistancia(lat1, lon1, lat2, lon2) {
-    const R = 6371000; // metros
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * Math.PI / 180) *
-      Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  <h2>Registro de Ch
