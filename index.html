@@ -3,82 +3,77 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Check-in Motoristas</title>
+  <title>Check-in de Motoristas - LSL</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f7fb;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    header {
+      background: white;
+      padding: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+    header img {
+      height: 50px;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin: 0;
+      color: #003366;
+    }
+    main {
+      max-width: 900px;
+      width: 100%;
+      padding: 20px;
+      text-align: center;
+    }
+    .mensagem {
+      font-size: 1.2rem;
+      margin-top: 20px;
+    }
+    iframe {
+      width: 100%;
+      height: 90vh;
+      border: none;
+    }
+  </style>
 </head>
 <body>
+  <header>
+    <img src="lsl.png" alt="Logo LSL">
+    <h1>Check-in de Motoristas</h1>
+  </header>
+  <main id="conteudo">
+    <p class="mensagem">Aguardando autorização de localização...</p>
+  </main>
 
-<h2>Check-in de Motoristas</h2>
-<button onclick="iniciarRegistro()">Iniciar Registro</button>
+  <script>
+    const pontoAlvo = {
+      latitude: -12.808922, // Altere para sua latitude
+      longitude: -38.428648 // Altere para sua longitude
+    };
+    const raioPermitido = 50; // Raio em metros
 
-<div id="status"></div>
+    function calcularDistancia(lat1, lon1, lat2, lon2) {
+      const R = 6371e3;
+      const φ1 = lat1 * Math.PI/180;
+      const φ2 = lat2 * Math.PI/180;
+      const Δφ = (lat2-lat1) * Math.PI/180;
+      const Δλ = (lon2-lon1) * Math.PI/180;
 
-<!-- Formulário escondido -->
-<div id="formulario" style="display:none; height: 90vh;">
-  <iframe 
-    src="" 
-    id="iframeForm" 
-    style="width: 100%; height: 100%; border: none;">
-  </iframe>
-</div>
-
-<script>
-  const LATITUDE_ALVO = -12.8089046;  
-  const LONGITUDE_ALVO = -38.4288266; 
-  const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSc9tq-rajX4bXekfQcl8p01VraF5lRMPg0uJAnVBIx_KTzW5w/viewform?embedded=true";
-  const RAIO_MAX_METROS = 500;
-
-  function iniciarRegistro() {
-    document.getElementById('status').innerText = "Solicitando permissão de localização...";
-    
-    if (!navigator.geolocation) {
-      document.getElementById('status').innerText = "Geolocalização não é suportada neste navegador.";
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = pos.coords.latitude;
-        const lon = pos.coords.longitude;
-
-        const distancia = calcularDistancia(lat, lon, LATITUDE_ALVO, LONGITUDE_ALVO);
-
-        document.getElementById('status').innerHTML = `
-          Sua localização atual:<br>
-          Latitude: ${lat.toFixed(6)}<br>
-          Longitude: ${lon.toFixed(6)}<br>
-          Distância até o ponto-alvo: ${distancia.toFixed(1)}m
-        `;
-
-        if (distancia <= RAIO_MAX_METROS) {
-          setTimeout(() => {
-            document.getElementById('iframeForm').src = FORM_URL;
-            document.getElementById('formulario').style.display = "block";
-          }, 1500);
-        }
-      },
-      (err) => {
-        if (err.code === 1) {
-          document.getElementById('status').innerText = "Permissão negada. Clique no botão para tentar novamente.";
-        } else {
-          document.getElementById('status').innerText = "Erro ao obter localização.";
-        }
-      }
-    );
-  }
-
-  function calcularDistancia(lat1, lon1, lat2, lon2) {
-    const R = 6371000; // metros
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos(lat1 * Math.PI / 180) *
-      Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon / 2) ** 2;
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  }
-</script>
-
-</body>
-</html>
+      const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ/2) * Math.sin(Δλ/2);
+      const c = 2 * Math.atan2(Math.s*
