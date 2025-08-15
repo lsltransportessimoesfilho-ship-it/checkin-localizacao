@@ -1,35 +1,104 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Check-in Motorista • Validação de Localização</title>
+  <title>Registro de Chegada • LSL Transportes</title>
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; padding: 24px; }
-    .card { max-width: 720px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; box-shadow: 0 6px 16px rgba(0,0,0,.06); }
-    h1 { font-size: 1.25rem; margin: 0 0 12px 0; }
-    .muted { color: #6b7280; }
-    .status { margin-top: 16px; padding: 12px 14px; border-radius: 12px; background: #f3f4f6; }
-    .ok { background: #ecfdf5; }
-    .err { background: #fef2f2; }
-    .spinner { width: 20px; height: 20px; border: 3px solid #e5e7eb; border-top-color: #111827; border-radius: 50%; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 8px; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #004aad, #0077ff);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: #ffffff;
+      color: #111827;
+      max-width: 400px;
+      width: 100%;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.15);
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 4px;
+    }
+    h2 {
+      font-size: 1rem;
+      color: #555;
+      margin-top: 0;
+    }
+    .icon {
+      font-size: 48px;
+      margin-bottom: 8px;
+    }
+    .status {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #f3f4f6;
+      color: #111;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+    .ok { background: #ecfdf5; color: #065f46; }
+    .err { background: #fef2f2; color: #991b1b; }
+    .spinner {
+      width: 20px; height: 20px;
+      border: 3px solid #e5e7eb;
+      border-top-color: #111827;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .small { font-size: .875rem; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
-    .hint { margin-top: 12px; color: #6b7280; }
-    .cta { margin-top: 16px; display: inline-block; padding: 10px 14px; border-radius: 10px; border: 1px solid #111827; text-decoration: none; color: #111827; cursor: pointer; background: white; }
-    .cta:hover { background: #f9fafb; }
+    .hint {
+      margin-top: 12px;
+      font-size: .85rem;
+      color: #6b7280;
+    }
+    .btn {
+      display: inline-block;
+      background: #004aad;
+      color: #fff;
+      padding: 12px 20px;
+      margin-top: 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .btn:hover {
+      background: #003a87;
+    }
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.8rem;
+      margin-top: 10px;
+      color: #555;
+    }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>Check-in Motorista</h1>
-    <p class="muted">Clique no botão abaixo para iniciar a validação de localização.</p>
-    <button id="startBtn" class="cta">Iniciar Check-in</button>
+    <div class="icon">🚚</div>
+    <h1>Registro de Chegada</h1>
+    <h2>LSL Transportes – PAD Simões Filho</h2>
+    <p>Para registrar sua chegada, permita o acesso à localização e esteja no perímetro da empresa.</p>
+    <button class="btn" onclick="init()">Iniciar Registro</button>
     <div id="status" class="status" style="display:none;"></div>
-    <p class="hint small">Se for solicitado, toque em <strong>Permitir</strong> para compartilhar sua localização.</p>
-    <div id="debug" class="hint small mono"></div>
+    <div id="debug" class="mono"></div>
   </div>
 
 <script>
@@ -44,17 +113,16 @@
     const toRad = deg => deg * Math.PI / 180;
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    const a = Math.sin(dLat/2) ** 2 +
               Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
+              Math.sin(dLon/2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
 
   function setStatus(html, cls="") {
     const box = document.getElementById("status");
-    box.style.display = "block";
     box.className = "status " + cls;
+    box.style.display = "block";
     box.innerHTML = html;
   }
 
@@ -69,28 +137,25 @@
     debug(`lat: ${latitude.toFixed(6)}, lng: ${longitude.toFixed(6)}, precisão: ${Math.round(accuracy)}m, dist: ${dist}m`);
 
     if (accuracy > 150) {
-      setStatus(
-        `<strong>Precisão fraca (${Math.round(accuracy)}m).</strong> Ative GPS/Alta precisão e tente novamente.`,
-        "err"
-      );
+      setStatus(`<strong>Precisão fraca (${Math.round(accuracy)}m).</strong> Ative o GPS em alta precisão e tente novamente.`, "err");
       return;
     }
 
     if (dist <= RAIO_METROS) {
-      setStatus(`<strong>Local verificado!</strong> Redirecionando…`, "ok");
+      setStatus(`<strong>Local verificado!</strong> Redirecionando para o formulário…`, "ok");
       const url = new URL(LINK_FORM);
       url.searchParams.set("utm_lat", latitude.toFixed(6));
       url.searchParams.set("utm_lng", longitude.toFixed(6));
       url.searchParams.set("utm_acc", Math.round(accuracy));
-      window.location.replace(url.toString());
+      setTimeout(() => window.location.replace(url.toString()), 1200);
     } else {
-      setStatus(`<strong>Fora do perímetro.</strong> Está a ${dist}m do ponto autorizado.`, "err");
+      setStatus(`<strong>Fora do perímetro.</strong> Você está a ${dist}m do ponto autorizado.`, "err");
     }
   }
 
   function handleError(err) {
     let msg = "Não foi possível obter sua localização.";
-    if (err.code === 1) msg = "Permissão negada. Toque em permitir para continuar.";
+    if (err.code === 1) msg = "Permissão negada. Toque em 'Iniciar Registro' e permita o acesso.";
     if (err.code === 2) msg = "Posição indisponível. Verifique se o GPS está ligado.";
     if (err.code === 3) msg = "Tempo esgotado tentando obter a posição.";
     setStatus("<strong>" + msg + "</strong>", "err");
@@ -102,15 +167,13 @@
       setStatus("<strong>Seu dispositivo não suporta geolocalização.</strong>", "err");
       return;
     }
-    setStatus("<span class='spinner'></span><strong>Validando localização…</strong>");
+    setStatus("<span class='spinner'></span><strong>Buscando sua posição...</strong>");
     navigator.geolocation.getCurrentPosition(handlePosition, handleError, {
       enableHighAccuracy: true,
       timeout: 15000,
       maximumAge: 0
     });
   }
-
-  document.getElementById("startBtn").addEventListener("click", init);
 </script>
 </body>
 </html>
