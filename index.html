@@ -48,6 +48,19 @@
       height: 90vh;
       border: none;
     }
+    button {
+      padding: 12px 25px;
+      background: #003366;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    button:hover {
+      background: #0055aa;
+    }
   </style>
 </head>
 <body>
@@ -56,13 +69,14 @@
     <h1>Check-in de Motoristas</h1>
   </header>
   <main id="conteudo">
-    <p class="mensagem">Aguardando autorização de localização...</p>
+    <p class="mensagem">Clique no botão abaixo para iniciar o check-in e autorizar a localização.</p>
+    <button onclick="iniciarCheckin()">Iniciar Check-in</button>
   </main>
 
   <script>
     const pontoAlvo = {
-      latitude: -12.8089222, // Altere para sua latitude
-      longitude: -38.428648 // Altere para sua longitude
+      latitude: -12.808922, // sua latitude
+      longitude: -38.428648 // sua longitude
     };
     const raioPermitido = 50; // Raio em metros
 
@@ -76,4 +90,39 @@
       const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
                 Math.cos(φ1) * Math.cos(φ2) *
                 Math.sin(Δλ/2) * Math.sin(Δλ/2);
-      const c = 2 * Math.atan2(Math.s*
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+      return R * c;
+    }
+
+    function iniciarCheckin() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(sucesso, erro);
+      } else {
+        document.getElementById('conteudo').innerHTML = `<p class="mensagem" style="color:red;">Seu navegador não suporta geolocalização.</p>`;
+      }
+    }
+
+    function sucesso(posicao) {
+      const lat = posicao.coords.latitude;
+      const lon = posicao.coords.longitude;
+      const distancia = calcularDistancia(lat, lon, pontoAlvo.latitude, pontoAlvo.longitude);
+
+      const conteudo = document.getElementById('conteudo');
+      conteudo.innerHTML = '';
+
+      if (distancia <= raioPermitido) {
+        conteudo.innerHTML = `
+          <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSc9tq-rajX4bXekfQcl8p01VraF5lRMPg0uJAnVBIx_KTzW5w/viewform?embedded=true" allowfullscreen></iframe>
+        `;
+      } else {
+        conteudo.innerHTML = `<p class="mensagem" style="color:red;">Você não está no local autorizado para realizar o check-in.</p>`;
+      }
+    }
+
+    function erro() {
+      document.getElementById('conteudo').innerHTML = `<p class="mensagem" style="color:red;">Não foi possível obter sua localização. Ative o GPS e tente novamente.</p>`;
+    }
+  </script>
+</body>
+</html>
