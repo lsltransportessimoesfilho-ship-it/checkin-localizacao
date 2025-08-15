@@ -76,8 +76,8 @@
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const lat = -12.631668505320404;
-        const lon = 38.265392000331936;
+        const lat = 12.631668;
+        const lon = 38.265392;
         const distancia = calcularDistancia(lat, lon, LATITUDE_ALVO, LONGITUDE_ALVO);
         
         if (distancia <= RAIO_MAX_METROS) {
