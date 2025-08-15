@@ -1,101 +1,183 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Registro de Chegada - LSL Transportes</title>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f4f6f8;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
-        color: #002b64;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro de Chegada • LSL Transportes da Amazônia - PAD Simões Filho</title>
+  <meta name="color-scheme" content="light only">
+  <style>
+    :root{
+      --azul:#0A2D5C;
+      --azul-escuro:#07264d;
+      --azul-claro:#1f5fbf;
+      --bg:#f5f7fb;
+      --ok:#065f46;
+      --ok-bg:#ecfdf5;
+      --err:#8a1414;
+      --err-bg:#fdecec;
+      --warn:#9a6b00;
+      --warn-bg:#fff7e6;
+      --muted:#6b7280;
+      --card:#ffffff;
     }
-    .container {
-        background: white;
-        border-radius: 12px;
-        padding: 20px;
-        max-width: 400px;
-        text-align: center;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: radial-gradient(1200px 700px at 50% -200px, #eaf1ff 0, #dbe8ff 30%, #cfe0ff 60%, #c7dcff 80%, #c7dcff 100%) fixed;
     }
-    img.logo {
-        max-width: 200px;
-        margin-bottom: 15px;
+    .card{
+      width:min(92vw,560px);
+      background:var(--card);
+      border-radius:20px;
+      padding:28px 24px;
+      box-shadow:0 20px 60px rgba(10,45,92,.15);
+      text-align:center;
+      border:1px solid rgba(10,45,92,.06);
     }
-    h1 {
-        font-size: 1.5em;
-        margin-bottom: 10px;
+    .logo{
+      height:56px;
+      margin-bottom:10px;
+      filter: drop-shadow(0 1px 0 rgba(0,0,0,.02));
     }
-    p {
-        font-size: 1em;
-        margin-bottom: 20px;
+    h1{
+      margin:0;
+      font-size: clamp(20px, 2.2vw + 14px, 28px);
+      color:var(--azul);
+      letter-spacing:.2px;
     }
-    .status {
-        font-weight: bold;
-        margin-top: 15px;
+    .sub{
+      margin:.25rem 0 1rem 0;
+      color:var(--muted);
+      font-size:.95rem;
     }
-    button {
-        background-color: #002b64;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 8px;
-        font-size: 1em;
-        cursor: pointer;
+    .status{ 
+      text-align:left;
+      padding:14px 16px;
+      border-radius:14px;
+      background:#f3f4f6;
+      color:#111827;
+      margin-top:10px;
     }
-    button:hover {
-        background-color: #004080;
+    .status.ok{ background:var(--ok-bg); color:var(--ok); }
+    .status.err{ background:var(--err-bg); color:var(--err); }
+    .status.warn{ background:var(--warn-bg); color:var(--warn); }
+    .row{ display:flex; align-items:center; gap:8px }
+    .spinner{
+      width:18px;height:18px;border:3px solid #e5e7eb;border-top-color:var(--azul);
+      border-radius:50%; animation:spin 1s linear infinite; flex:none
     }
-</style>
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .btn{
+      appearance:none; border:none; cursor:pointer; font-weight:600;
+      background:var(--azul); color:#fff; padding:12px 18px; border-radius:10px;
+      margin-top:14px; transition:transform .02s ease, background .2s ease;
+      box-shadow:0 8px 20px rgba(10,45,92,.18);
+    }
+    .btn:active{ transform: translateY(1px) }
+    .btn:hover{ background:var(--azul-escuro) }
+    .hint{ color:var(--muted); font-size:.875rem; margin-top:10px }
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size:.85rem; color:#374151; white-space:pre-wrap }
+    .badge{ display:inline-block; font-size:.75rem; padding:2px 8px; border-radius:999px; background:#eef2ff; color:#1f3a8a; margin-left:6px }
+    .divider{ height:1px; background:#eef2ff; margin:12px 0 }
+  </style>
 </head>
 <body>
-
-<div class="container">
-    <img src="lsl.png" alt="Logo LSL" class="logo">
+  <main class="card">
+    <img class="logo" src="lsl.png" alt="LSL Transportes" />
     <h1>Registro de Chegada</h1>
-    <p>LSL Transportes da Amazônia - PAD Simões Filho</p>
-    <p id="mensagem">Validando sua localização...</p>
-    <div id="status" class="status"></div>
-    <button id="tentarNovamente" style="display:none;" onclick="obterLocalizacao()">Tentar novamente</button>
-</div>
+    <div class="sub">LSL Transportes da Amazônia – PAD Simões Filho</div>
+
+    <div id="status" class="status">
+      <div class="row"><span class="spinner"></span><strong>Passo 1:</strong>&nbsp;Solicitando permissão de localização…</div>
+      <div class="hint">Se aparecer o pedido, toque em <b>Permitir</b>.</div>
+    </div>
+
+    <button id="retry" class="btn" style="display:none">Tentar novamente</button>
+
+    <div id="debug" class="mono" style="margin-top:10px"></div>
+    <div class="hint">Este registro só é permitido dentro do perímetro autorizado da empresa.</div>
+  </main>
 
 <script>
-function obterLocalizacao() {
-    document.getElementById('mensagem').innerText = "Validando sua localização...";
-    document.getElementById('status').innerText = "";
-    document.getElementById('tentarNovamente').style.display = "none";
+  // ======= CONFIGURAÇÕES =======
+  const LAT_EMPRESA   = -12.808930812471532;
+  const LNG_EMPRESA   = -38.42873008974748;
+  const RAIO_METROS   = 150;       // raio permitido
+  const MAX_ACCURACY  = 150;       // precisão máxima aceitável (m). Ajuste se necessário.
+  const LINK_FORM     = "https://docs.google.com/forms/d/e/1FAIpQLSc9tq-rajX4bXekfQcl8p01VraF5lRMPg0uJAnVBIx_KTzW5w/viewform?usp=header";
 
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            function(position) {
-                document.getElementById('mensagem').innerText = "Localização obtida com sucesso!";
-                document.getElementById('status').innerText = "Latitude: " + position.coords.latitude.toFixed(6) +
-                    ", Longitude: " + position.coords.longitude.toFixed(6);
-            },
-            function(error) {
-                if (error.code === error.PERMISSION_DENIED) {
-                    document.getElementById('mensagem').innerText = "Permissão negada para acessar localização.";
-                    document.getElementById('tentarNovamente').style.display = "inline-block";
-                } else {
-                    document.getElementById('mensagem').innerText = "Erro ao obter localização.";
-                }
-            }
-        );
-    } else {
-        document.getElementById('mensagem').innerText = "Geolocalização não é suportada neste dispositivo.";
+  // ======= UTIL =======
+  const $ = (id) => document.getElementById(id);
+  const setStatus = (html, cls="") => { const b=$("status"); b.className="status "+cls; b.innerHTML=html; };
+  const debug = (msg) => { const el=$("debug"); el.textContent = (el.textContent?el.textContent+"\\n":"")+msg; };
+  const haversine = (lat1, lon1, lat2, lon2) => {
+    const R = 6371e3, toRad = d=>d*Math.PI/180;
+    const dLat = toRad(lat2-lat1), dLon = toRad(lon2-lon1);
+    const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  };
+
+  function redirecionarFormulario({lat, lng, acc}){
+    setStatus("<strong>Local verificado!</strong> Redirecionando para o formulário…", "ok");
+    // Encaminha com parâmetros informativos (não gravam no Forms por padrão)
+    const url = new URL(LINK_FORM);
+    url.searchParams.set("utm_lat", lat.toFixed(6));
+    url.searchParams.set("utm_lng", lng.toFixed(6));
+    url.searchParams.set("utm_acc", Math.round(acc));
+    setTimeout(()=>{ window.location.replace(url.toString()); }, 900);
+  }
+
+  function avaliarPosicao(pos){
+    const { latitude:lat, longitude:lng, accuracy:acc } = pos.coords;
+    const dist = Math.round(haversine(lat, lng, LAT_EMPRESA, LNG_EMPRESA));
+    debug(\`lat: \${lat.toFixed(6)}, lng: \${lng.toFixed(6)}, precisão: \${Math.round(acc)}m, dist: \${dist}m\`);
+
+    if (acc > MAX_ACCURACY){
+      setStatus(\`<strong>Precisão fraca (\${Math.round(acc)}m).</strong> Ative o GPS (alta precisão) e tente novamente.\`, "warn");
+      $("retry").style.display = "inline-block";
+      return;
     }
-}
+    if (dist <= RAIO_METROS){
+      redirecionarFormulario({lat,lng,acc});
+    }else{
+      setStatus(\`<strong>Fora do perímetro autorizado.</strong> Você está a \${dist}m do ponto da empresa. Aproxime-se para registrar a chegada.\`, "err");
+      $("retry").style.display = "inline-block";
+    }
+  }
 
-window.onload = obterLocalizacao;
+  function tratarErro(err){
+    let msg = "Não foi possível obter sua localização.";
+    if (err.code === 1) msg = "Permissão de localização negada. É necessário permitir para registrar a chegada.";
+    if (err.code === 2) msg = "Posição indisponível. Verifique se o GPS está ligado e se há sinal.";
+    if (err.code === 3) msg = "Tempo esgotado tentando obter a posição.";
+    setStatus("<strong>"+msg+"</strong>", err.code===1 ? "warn" : "err");
+    debug("Erro ("+err.code+"): "+err.message);
+    $("retry").style.display = "inline-block";
+  }
+
+  function solicitar(){
+    $("retry").style.display = "none";
+    if (!("geolocation" in navigator)){
+      setStatus("<strong>Este dispositivo não suporta geolocalização.</strong>", "err");
+      return;
+    }
+    setStatus("<div class='row'><span class='spinner'></span><strong>Passo 2:</strong>&nbsp;Buscando sua posição…</div>");
+    navigator.geolocation.getCurrentPosition(avaliarPosicao, tratarErro, {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0
+    });
+  }
+
+  $("retry").addEventListener("click", solicitar);
+
+  // Ao abrir a página, já solicita permissão/posição
+  solicitar();
 </script>
-
 </body>
 </html>
