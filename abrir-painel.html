@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Abrindo painel...</title>
+  <script>
+    const painel = "https://lookerstudio.google.com/reporting/51cb61d1-6735-4be2-b991-106db02e5844";
+    const voltar = "https://lsltransportessimoesfilho-ship-it.github.io/checkin-localizacao/"; // sua página inicial
+    window.onload = () => {
+      window.open(painel, "_blank");   // abre o painel em nova aba
+      window.location.replace(voltar); // redireciona a aba atual de volta
+    };
+  </script>
+</head>
+<body>
+  <p>Abrindo o painel, aguarde...</p>
+</body>
+</html>
