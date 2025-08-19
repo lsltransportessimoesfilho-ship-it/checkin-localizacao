@@ -85,12 +85,10 @@
 
   <script>
     const pontoAlvo = {
-      latitude: -12.808922,
-      longitude: -38.428648
+      latitude: -12.808922, // sua latitude
+      longitude: -38.428648 // sua longitude
     };
-    const raioPermitido = 500; // metros
-    const formURL = "https://docs.google.com/forms/d/e/1FAIpQLSc9tq-rajX4bXekfQcl8p01VraF5lRMPg0uJAnVBIx_KTzW5w/viewform?embedded=true";
-    const painelLooker = "https://lookerstudio.google.com/reporting/51cb61d1-6735-4be2-b991-106db02e5844"; 
+    const raioPermitido = 500; // Raio em metros
 
     function calcularDistancia(lat1, lon1, lat2, lon2) {
       const R = 6371e3;
@@ -124,23 +122,9 @@
       conteudo.innerHTML = '';
 
       if (distancia <= raioPermitido) {
-        conteudo.innerHTML = `<iframe id="formulario" src="${formURL}" allowfullscreen></iframe>`;
-
-        // Monitorar quando o form for enviado
-        const iframe = document.getElementById("formulario");
-        iframe.addEventListener("load", function() {
-          try {
-            if (iframe.contentWindow.location.href.includes("formResponse")) {
-              // abre o painel em nova aba
-              window.open(painelLooker, "_blank");
-              // recarrega o form para o próximo motorista
-              iframe.src = formURL;
-            }
-          } catch (e) {
-            // ignora erro de cross-origin
-          }
-        });
-
+        conteudo.innerHTML = `
+          <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSc9tq-rajX4bXekfQcl8p01VraF5lRMPg0uJAnVBIx_KTzW5w/viewform?embedded=true" allowfullscreen></iframe>
+        `;
       } else {
         conteudo.innerHTML = `<p class="mensagem" style="color:red;">Você não está no local autorizado para realizar o check-in.</p>`;
       }
