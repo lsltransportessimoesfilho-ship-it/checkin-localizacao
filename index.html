@@ -90,12 +90,8 @@
     };
     const raioPermitido = 500; // metros
 
-    // ★ URLs centralizadas
     const formURL = "https://docs.google.com/forms/d/e/1FAIpQLSc9tq-rajX4bXekfQcl8p01VraF5lRMPg0uJAnVBIx_KTzW5w/viewform?embedded=true";
     const painelLooker = "https://lookerstudio.google.com/reporting/51cb61d1-6735-4be2-b991-106db02e5844";
-
-    // ★ Referência da aba pré-aberta (evita bloqueio de popup)
-    let lookerTab = null;
 
     function calcularDistancia(lat1, lon1, lat2, lon2) {
       const R = 6371e3;
@@ -113,28 +109,11 @@
     }
 
     function iniciarCheckin() {
-      // ★ Abre uma aba em branco AGORA (gesto do usuário) para não ser bloqueado
-      lookerTab = window.open("", "_blank");
-      if (lookerTab) {
-        lookerTab.document.write(`
-          <!doctype html>
-          <title>Painel LSL</title>
-          <meta name="viewport" content="width=device-width, initial-scale=1">
-          <div style="font-family: Arial, sans-serif; padding:20px;">
-            <h2>Carregando painel...</h2>
-            <p>Após enviar o formulário, o painel abrirá automaticamente aqui.</p>
-          </div>
-        `);
-        lookerTab.document.close();
-      }
-
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(sucesso, erro);
       } else {
         document.getElementById('conteudo').innerHTML =
           `<p class="mensagem" style="color:red;">Seu navegador não suporta geolocalização.</p>`;
-        // ★ Fecha a aba se não for usar
-        if (lookerTab && !lookerTab.closed) lookerTab.close();
       }
     }
 
@@ -147,49 +126,40 @@
       conteudo.innerHTML = '';
 
       if (distancia <= raioPermitido) {
-        conteudo.innerHTML = `
-          <iframe id="formulario" src="${formURL}" allowfullscreen></iframe>
-        `;
+        conteudo.innerHTML = `<iframe id="formulario" src="${formURL}" allowfullscreen></iframe>`;
 
-        // ★ Detecta a 2ª navegação do iframe (após o envio)
         const iframe = document.getElementById("formulario");
-        let firstLoad = true; // primeira carga é o "viewform"
-        iframe.addEventListener("load", function() {
-          // Primeira carga: só marca e sai
-          if (firstLoad) { firstLoad = false; return; }
+        let firstLoad = true;
 
-          // Qualquer nova navegação do iframe (tipicamente 'formResponse')
-          try {
-            if (lookerTab && !lookerTab.closed) {
-              lookerTab.location.href = painelLooker; // usa a aba já aberta
-              lookerTab.focus();
-            } else {
-              // fallback (caso o navegador tenha bloqueado a aba pré-aberta)
-              window.open(painelLooker, "_blank");
-            }
-          } catch(e) {
-            // fallback silencioso
-            window.open(painelLooker, "_blank");
+        iframe.addEventListener("load", function() {
+          if (firstLoad) {
+            firstLoad = false; 
+            return;
           }
 
-          // Recarrega o formulário para o próximo motorista
-          firstLoad = true; // reseta a flag
-          iframe.src = formURL;
+          try {
+            if (iframe.contentWindow.location.href.includes("formResponse")) {
+              // Abre o painel em nova aba
+              window.open(painelLooker, "_blank");
+
+              // Recarrega o formulário no mesmo iframe
+              firstLoad = true; 
+              iframe.src = formURL;
+            }
+          } catch (e) {
+            window.open(painelLooker, "_blank");
+          }
         });
 
       } else {
         conteudo.innerHTML =
           `<p class="mensagem" style="color:red;">Você não está no local autorizado para realizar o check-in.</p>`;
-        // ★ Fecha a aba em branco, já que não usaremos
-        if (lookerTab && !lookerTab.closed) lookerTab.close();
       }
     }
 
     function erro() {
       document.getElementById('conteudo').innerHTML =
         `<p class="mensagem" style="color:red;">Não foi possível obter sua localização. Ative o GPS e tente novamente.</p>`;
-      // ★ Fecha a aba em branco se houve erro
-      if (lookerTab && !lookerTab.closed) lookerTab.close();
     }
   </script>
 </body>
