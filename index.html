@@ -88,7 +88,7 @@
       latitude: -12.808922, // sua latitude
       longitude: -38.428648 // sua longitude
     };
-    const raioPermitido = 1000; // Raio em metros
+    const raioPermitido = 100; // Raio em metros
 
     function calcularDistancia(lat1, lon1, lat2, lon2) {
       const R = 6371e3;
@@ -123,7 +123,7 @@
 
       if (distancia <= raioPermitido) {
         conteudo.innerHTML = `
-          <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSc9tq-rajX4bXekfQcl8p01VraF5lRMPg0uJAnVBIx_KTzW5w/viewform?embedded=true" allowfullscreen></iframe>
+          <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfug3DKXwhGHdwfVr9iaFjQPVRd3gvBvgzTW7uBx2FYC_GXEA/viewform?usp=header" allowfullscreen></iframe>
         `;
       } else {
         conteudo.innerHTML = `<p class="mensagem" style="color:red;">Você não está no local autorizado para realizar o check-in.</p>`;
